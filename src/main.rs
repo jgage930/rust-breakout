@@ -24,6 +24,7 @@ struct MainState {
     paddle: Paddle, 
     ball: Ball,
     bricks: Vec<Brick>,
+    score: u32,
 }
 
 impl MainState {
@@ -45,6 +46,7 @@ impl MainState {
             paddle: Paddle::new()?,
             ball: Ball::new()?,
             bricks: bricks,
+            score: 0,
         })
     }
 }
@@ -73,6 +75,23 @@ impl event::EventHandler<ggez::GameError> for MainState {
 
         self.paddle.rect.x += paddle_dx;
 
+        // remove bricks on collision
+        self.bricks.retain(|brick | {
+            let delete = {
+                self.ball.rect.overlaps(&brick.rect)
+            };
+
+            if delete {
+                self.score += 1;
+
+                self.ball.v_y *= -1.0;
+                self.ball.v_x *= -1.0;
+            }
+
+            !delete
+        });
+
+        println!("{}", self.score.to_string());
 
         // check if ball hits the top of screen
         if self.ball.rect.top() - BALL_SPEED <= 0.0 {
@@ -154,7 +173,7 @@ impl Ball {
     fn new() -> GameResult<Ball> {
         Ok(
             Ball {
-                v_x: 0.0 , v_y: BALL_SPEED, rect: Rect::new(WIN_SIZE.0 / 2.0, WIN_SIZE.1 / 2.0, BALL_SIZE, BALL_SIZE),
+                v_x: 1.0 , v_y: BALL_SPEED, rect: Rect::new(WIN_SIZE.0 / 2.0, WIN_SIZE.1 / 2.0, BALL_SIZE, BALL_SIZE),
             }
         )
     }

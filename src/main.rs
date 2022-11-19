@@ -2,10 +2,10 @@ use ggez::{
     Context,
     GameResult,
     event,
-    graphics::{Canvas, Color, Rect, Mesh, DrawMode, DrawParam,},
+    graphics::{Canvas, Color, Rect, Mesh, DrawMode, DrawParam, Text,},
     timer,
     conf,
-    input::keyboard::{KeyCode,},
+    input::keyboard::{KeyCode,}, glam::Vec2,
 };
 
 pub const WIN_SIZE: (f32, f32) = (400.0, 600.0);
@@ -14,7 +14,7 @@ pub const PADDLE_W: f32 = 75.0;
 pub const PADDLE_H: f32 = 25.0;
 pub const PADDLE_SPEED: f32 = 7.0; 
 
-pub const BALL_SPEED: f32 = 5.0;
+pub const BALL_SPEED: f32 = 9.0;
 pub const BALL_SIZE: f32 = 15.0;
 
 pub const BRICK_W: f32 = 50.0;
@@ -34,12 +34,14 @@ impl MainState {
         for i in (0..400).step_by(BRICK_W as usize) {
             let left = i as f32;
 
-            
-            bricks.push(
-                Brick::new(left, 100.0)?
-            );
+            for j in (100..200).step_by(BRICK_H as usize) {
 
-        } 
+                let top = j as f32;
+                bricks.push(
+                    Brick::new(left, top)?
+                );
+            }
+        }
 
 
         Ok(MainState {
@@ -91,8 +93,6 @@ impl event::EventHandler<ggez::GameError> for MainState {
             !delete
         });
 
-        println!("{}", self.score.to_string());
-
         // check if ball hits the top of screen
         if self.ball.rect.top() - BALL_SPEED <= 0.0 {
             self.ball.v_y *= -1.0;
@@ -140,7 +140,9 @@ impl event::EventHandler<ggez::GameError> for MainState {
             let brick_mesh = Mesh::new_rectangle(ctx, DrawMode::stroke(2.0), brick.rect, Color::BLUE)?;
             canvas.draw(&brick_mesh, DrawParam::default())
         }
-        
+
+        let score_display = Text::new(format!("Score: {}", self.score.to_string()));
+        canvas.draw(&score_display, Vec2::new(WIN_SIZE.0 / 2.0, WIN_SIZE.1 / 2.0));
 
         canvas.finish(ctx)?;
         timer::yield_now();

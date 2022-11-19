@@ -17,15 +17,34 @@ pub const PADDLE_SPEED: f32 = 7.0;
 pub const BALL_SPEED: f32 = 5.0;
 pub const BALL_SIZE: f32 = 15.0;
 
+pub const BRICK_W: f32 = 50.0;
+pub const BRICK_H: f32 = 20.0;
+
 struct MainState {
-    paddle: Paddle, ball: Ball,
+    paddle: Paddle, 
+    ball: Ball,
+    bricks: Vec<Brick>,
 }
 
 impl MainState {
     fn new(_ctx: &mut Context) -> GameResult<MainState> {
+        let mut bricks = Vec::new();
+
+        for i in (0..400).step_by(BRICK_W as usize) {
+            let left = i as f32;
+
+            
+            bricks.push(
+                Brick::new(left, 100.0)?
+            );
+
+        } 
+
+
         Ok(MainState {
             paddle: Paddle::new()?,
             ball: Ball::new()?,
+            bricks: bricks,
         })
     }
 }
@@ -97,6 +116,13 @@ impl event::EventHandler<ggez::GameError> for MainState {
         let ball_mesh = Mesh::new_rectangle(ctx, DrawMode::fill(), self.ball.rect, Color::RED)?;
         canvas.draw(&ball_mesh, DrawParam::default());
 
+        //draw bricks
+        for brick in self.bricks.iter() {
+            let brick_mesh = Mesh::new_rectangle(ctx, DrawMode::stroke(2.0), brick.rect, Color::BLUE)?;
+            canvas.draw(&brick_mesh, DrawParam::default())
+        }
+        
+
         canvas.finish(ctx)?;
         timer::yield_now();
 
@@ -132,6 +158,22 @@ impl Ball {
             }
         )
     }
+}
+
+
+struct Brick {
+    rect: Rect,
+}
+
+impl Brick {
+    fn new(x: f32, y: f32) -> GameResult<Brick> {
+        Ok(
+            Brick {
+                rect: Rect::new(x, y, BRICK_W, BRICK_H),
+            }
+        )
+    }
+    
 }
 
 
